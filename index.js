@@ -10,7 +10,7 @@ const AUTH_HEADERS = {
 };
 
 const ALQUERIA_USUARIOS_URL = "https://botai.smartdataautomation.com/api_backend_ai/dinamic-db/report/119/usuarios_alqueria";
-const ALQUERIA_DATA_URL = "https://botai.smartdataautomation.com/api_backend_ai/dinamic-db/report/119/MCM_PRUEBAS";
+const ALQUERIA_DATA_URL = "https://botai.smartdataautomation.com/api_backend_ai/dinamic-db/report/119/alqueria_geo_usuarios";
 
 app.use(cors());
 app.use(express.json());
