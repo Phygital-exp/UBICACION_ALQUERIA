@@ -173,7 +173,7 @@
             <input 
                 type="text" 
                 id="cedula" 
-                placeholder="Ingresa tu cédula"
+                placeholder="Ingresa el codigo de usuario"
                 onkeypress="if(event.key === 'Enter') validarUsuario()"
             >
             <button id="btn-validar" onclick="validarUsuario()">
@@ -186,7 +186,7 @@
     <!-- STEP 2: Usuario Validado -->
     <div id="step-2" class="hidden">
         <div class="user-info">
-            <p><strong><i class="material-icons icon">person</i>Cédula:</strong> <span id="cedula-display"></span></p>
+            <p><strong><i class="material-icons icon">person</i>Código de usuario:</strong> <span id="cedula-display"></span></p>
             <p><strong><i class="material-icons icon">person_outline</i>Nombre:</strong> <span id="nombre-display">-</span></p>
             <p><strong><i class="material-icons icon">location_on</i>Región:</strong> <span id="region-display">-</span></p>
         </div>
@@ -226,12 +226,12 @@
         const mensaje = document.getElementById('mensaje');
 
         if (!cedula) {
-            mensaje.innerHTML = '<p class="status error"><i class="material-icons icon">error</i>Por favor ingresa una cédula</p>';
+            mensaje.innerHTML = '<p class="status error"><i class="material-icons icon">error</i>Por favor ingresa el código de usuario</p>';
             return;
         }
 
         // Mostrar loading
-        mensaje.innerHTML = '<p class="status info"><span class="loading"></span>Validando cédula...</p>';
+        mensaje.innerHTML = '<p class="status info"><span class="loading"></span>Validando código de usuario...</p>';
 
         try {
             // Llamar al Proxy para validar
@@ -258,7 +258,7 @@
                 mensaje.innerHTML = '';
             } else {
                 // Usuario no existe
-                mensaje.innerHTML = '<p class="status error"><i class="material-icons icon">block</i>⚠️ El usuario no existe. Revisa la cédula e intenta de nuevo.</p>';
+                mensaje.innerHTML = '<p class="status error"><i class="material-icons icon">block</i>⚠️ El usuario no existe. Revisa el código de usuario e intenta de nuevo.</p>';
                 document.getElementById('cedula').value = '';
             }
         } catch (error) {
