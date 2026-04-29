@@ -9,8 +9,8 @@ const AUTH_HEADERS = {
     "Content-Type": "application/json",
 };
 
-const ALQUERIA_USUARIOS_URL = "https://botai.smartdataautomation.com/api_backend_ai/dinamic-db/report/119/usuarios_alqueria";
-const ALQUERIA_DATA_URL = "https://botai.smartdataautomation.com/api_backend_ai/dinamic-db/report/119/alqueria_geo_usuarios";
+const NUTRESA_USUARIOS_URL = "https://botai.smartdataautomation.com/api_backend_ai/dinamic-db/report/119/usuarios_nutresa";
+const NUTRESA_DATA_URL = "https://botai.smartdataautomation.com/api_backend_ai/dinamic-db/report/119/nutresa_geo_usuarios";
 
 app.use(cors());
 app.use(express.json());
@@ -29,10 +29,10 @@ app.get("/api/validar", async (req, res) => {
 
         console.log(`Validando cédula: ${cedula}`);
 
-        const response = await fetch(ALQUERIA_USUARIOS_URL, { headers: AUTH_HEADERS });
+        const response = await fetch(NUTRESA_USUARIOS_URL, { headers: AUTH_HEADERS });
         
         if (!response.ok) {
-            throw new Error(`Error al consultar MCM_USUARIOS: ${response.status}`);
+            throw new Error(`Error al consultar USUARIOS_NUTRESA: ${response.status}`);
         }
 
         const data = await response.json();
@@ -70,29 +70,31 @@ app.get("/api/validar", async (req, res) => {
 // ========== ENDPOINT PARA ENVIAR UBICACIÓN ==========
 app.post("/api/enviar-ubicacion", async (req, res) => {
     try {
-        const { CEDULA, LATITUD, LONGITUD } = req.body;
+        const { CEDULA, TELEFONO, CIUDAD, NOMBRE, RUTA } = req.body;
 
-        console.log(`📍 Datos recibidos:`, { CEDULA, LATITUD, LONGITUD });
+        console.log(`📍 Datos recibidos:`, { CEDULA, TELEFONO, CIUDAD, NOMBRE, RUTA });
 
-        if (!CEDULA || LATITUD === undefined || LONGITUD === undefined) {
+        if (!CEDULA || !TELEFONO || !CIUDAD || !NOMBRE || !RUTA) {
             return res.status(400).json({ 
                 success: false,
-                mensaje: "Cédula, latitud o longitud no proporcionada"
+                mensaje: "CEDULA, TELEFONO, CIUDAD, NOMBRE o RUTA no proporcionado"
             });
         }
 
         const cedulaString = CEDULA.toString().trim();
 
-        // ✅ CORREGIDO: Se envían LATITUD y LONGITUD por separado
+        // ✅ CORREGIDO: Se envían todos los campos requeridos para Nutresa
         const payload = {
             CEDULA: cedulaString,
-            LATITUD: parseFloat(LATITUD),
-            LONGITUD: parseFloat(LONGITUD)
+            TELEFONO: TELEFONO,
+            CIUDAD: CIUDAD,
+            NOMBRE: NOMBRE,
+            RUTA: RUTA
         };
 
-        console.log(`📍 Enviando a Alqueria:`, JSON.stringify(payload, null, 2));
+        console.log(`📍 Enviando a Nutresa:`, JSON.stringify(payload, null, 2));
 
-        const response = await fetch(ALQUERIA_DATA_URL, {
+        const response = await fetch(NUTRESA_DATA_URL, {
             method: 'POST',
             headers: AUTH_HEADERS,
             body: JSON.stringify(payload)
@@ -103,25 +105,25 @@ app.post("/api/enviar-ubicacion", async (req, res) => {
         console.log(`📍 Response data:`, JSON.stringify(data, null, 2));
 
         if (response.ok) {
-            console.log(`✅ Ubicación enviada correctamente para: ${cedulaString}`);
+            console.log(`✅ Datos enviados correctamente a Nutresa para: ${cedulaString}`);
             res.json({
                 success: true,
-                mensaje: "Ubicación enviada correctamente",
+                mensaje: "Datos enviados correctamente",
                 data: data
             });
         } else {
-            console.error(`❌ Error al enviar ubicación: ${response.status}`, data);
+            console.error(`❌ Error al enviar datos a Nutresa: ${response.status}`, data);
             res.status(response.status).json({
                 success: false,
-                error: "Error al enviar ubicación",
+                error: "Error al enviar datos",
                 details: data
             });
         }
     } catch (err) {
-        console.error("Error al enviar ubicación:", err);
+        console.error("Error al enviar datos:", err);
         res.status(500).json({ 
             success: false,
-            error: "Error al enviar ubicación",
+            error: "Error al enviar datos",
             details: err.message
         });
     }
@@ -145,8 +147,8 @@ app.get("/api/Levapan/pdv", async (req, res) => {
         const data = await response.json();
         res.json(data);
     } catch (err) {
-        console.error("Error en el proxy alqueria PDV:", err);
-        res.status(500).json({ error: "Error al obtener datos de alqueria PDV" });
+        console.error("Error en el proxy Nutresa PDV:", err);
+        res.status(500).json({ error: "Error al obtener datos de Nutresa PDV" });
     }
 });
 
@@ -167,10 +169,10 @@ app.post("/api/debug", (req, res) => {
 });
 
 app.listen(PORT, () => {
-    console.log(`🚀 Servidor proxy escuchando en puerto ${PORT}`);
+    console.log(`🚀 Servidor proxy Nutresa escuchando en puerto ${PORT}`);
     console.log(`📍 Endpoints disponibles:`);
     console.log(`   - GET  /api/validar?cedula=XXXXX`);
-    console.log(`   - POST /api/enviar-ubicacion`);
+    console.log(`   - POST /api/enviar-ubicacion (CEDULA, TELEFONO, CIUDAD, NOMBRE, RUTA)`);
     console.log(`   - POST /api/debug`);
     console.log(`   - GET  /health`);
 });
