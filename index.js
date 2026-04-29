@@ -7,6 +7,8 @@ const PORT = process.env.PORT || 3000;
 const AUTH_HEADERS = {
     Authorization: "Token 9b7661d9292aab2c339b95bf251063791c2a62ff",
     "Content-Type": "application/json",
+    "Accept": "application/json",
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
 };
 
 const ALQUERIA_USUARIOS_URL = "https://botai.smartdataautomation.com/api_backend_ai/dinamic-db/report/119/usuarios_alqueria";
@@ -32,7 +34,11 @@ app.get("/api/validar", async (req, res) => {
         const response = await fetch(ALQUERIA_USUARIOS_URL, { headers: AUTH_HEADERS });
         
         if (!response.ok) {
-            throw new Error(`Error al consultar MCM_USUARIOS: ${response.status}`);
+            const errorData = await response.text();
+            console.error(`❌ Error ${response.status} en ALQUERIA_USUARIOS:`);
+            console.error(`Headers enviados:`, AUTH_HEADERS);
+            console.error(`Response:`, errorData);
+            throw new Error(`Error al consultar ALQUERIA_USUARIOS: ${response.status} - ${errorData}`);
         }
 
         const data = await response.json();
@@ -62,7 +68,8 @@ app.get("/api/validar", async (req, res) => {
         console.error("Error en la validación:", err);
         res.status(500).json({ 
             existe: false,
-            error: "Error al validar usuario" 
+            error: "Error al validar usuario",
+            detalles: err.message
         });
     }
 });
