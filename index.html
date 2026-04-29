@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Ubicación Alqueria</title>
+    <title>Sistema de Ubicación Nutresa</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <style>
         * {
@@ -165,7 +165,7 @@
 <body>
 
 <div class="container">
-    <h2>🗺️ Sistema de Ubicación Alqueria</h2>
+    <h2>🗺️ Sistema de Ubicación Nutresa</h2>
 
     <!-- STEP 1: Validar Usuario -->
     <div id="step-1">
@@ -209,7 +209,7 @@
 
 <script>
     // ========== CONFIGURACIÓN ==========
-    const PROXY_URL = "https://ubicacionalqueria-production.up.railway.app"; // URL del Proxy en Railway
+    const PROXY_URL = "https://ubicacionnutresa-production.up.railway.app"; // URL del Proxy en Railway
 
     // ========== VARIABLES GLOBALES ==========
     let usuarioValidado = null;
@@ -271,48 +271,44 @@
     function enviarDatos() {
         const mensajeUbicacion = document.getElementById('mensaje-ubicacion');
 
-        if (!navigator.geolocation) {
-            mensajeUbicacion.innerHTML = '<p class="status error"><i class="material-icons icon">location_off</i>Geolocalización no está disponible en tu navegador.</p>';
+        if (!usuarioValidado) {
+            mensajeUbicacion.innerHTML = '<p class="status error"><i class="material-icons icon">error</i>Error: Usuario no validado.</p>';
             return;
         }
 
-        mensajeUbicacion.innerHTML = '<p class="status info"><span class="loading"></span>Obteniendo tu ubicación...</p>';
+        // Preparar payload con los datos del usuario
+        const payload = {
+            CEDULA: usuarioValidado.CEDULA || document.getElementById('cedula-display').textContent,
+            TELEFONO: usuarioValidado.TELEFONO || '',
+            CIUDAD: usuarioValidado.CIUDAD || usuarioValidado.REGION || '',
+            NOMBRE: usuarioValidado.NOMBRE || '',
+            RUTA: usuarioValidado.RUTA || ''
+        };
 
-        navigator.geolocation.getCurrentPosition(
-            async (pos) => {
-                // Enviar latitud y longitud por separado
-                const payload = {
-                    CEDULA: usuarioValidado.CEDULA || document.getElementById('cedula-display').textContent,
-                    LATITUD: pos.coords.latitude,
-                    LONGITUD: pos.coords.longitude
-                };
+        console.log("Enviando:", payload);
+        mensajeUbicacion.innerHTML = '<p class="status info"><span class="loading"></span>Enviando datos...</p>';
 
-                console.log("Enviando:", payload);
-
-                try {
-                    mensajeUbicacion.innerHTML = '<p class="status info"><span class="loading"></span>Enviando datos...</p>';
-
-                    const res = await fetch(`${PROXY_URL}/api/enviar-ubicacion`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-
-                    if (res.ok) {
-                        mensajeUbicacion.innerHTML = '<p class="status success"><i class="material-icons icon">check_circle</i>✅ Ubicación enviada correctamente!</p>';
-                    } else {
-                        throw new Error('Error en la respuesta del servidor');
-                    }
-                } catch (error) {
-                    console.error("Error al enviar:", error);
-                    mensajeUbicacion.innerHTML = '<p class="status error"><i class="material-icons icon">error</i>❌ Error al enviar los datos. Intenta de nuevo.</p>';
+        try {
+            fetch(`${PROXY_URL}/api/enviar-ubicacion`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(res => {
+                if (res.ok) {
+                    mensajeUbicacion.innerHTML = '<p class="status success"><i class="material-icons icon">check_circle</i>✅ Datos enviados correctamente!</p>';
+                } else {
+                    throw new Error('Error en la respuesta del servidor');
                 }
-            },
-            (error) => {
-                console.error("Error de geolocalización:", error);
-                mensajeUbicacion.innerHTML = '<p class="status error"><i class="material-icons icon">location_off</i>❌ No se pudo obtener tu ubicación. Verifica los permisos.</p>';
-            }
-        );
+            })
+            .catch(error => {
+                console.error("Error al enviar:", error);
+                mensajeUbicacion.innerHTML = '<p class="status error"><i class="material-icons icon">error</i>❌ Error al enviar los datos. Intenta de nuevo.</p>';
+            });
+        } catch (error) {
+            console.error("Error:", error);
+            mensajeUbicacion.innerHTML = '<p class="status error"><i class="material-icons icon">error</i>❌ Error al enviar los datos. Intenta de nuevo.</p>';
+        }
     }
 
     // ========== VOLVER AL INICIO ==========
