@@ -67,7 +67,7 @@ app.get("/api/validar", async (req, res) => {
     }
 });
 
-// ========== ENDPOINT PARA ENVIAR UBICACIÓN ==========
+// ========== ENDPOINT PARA ENVIAR DATOS ==========
 app.post("/api/enviar-ubicacion", async (req, res) => {
     try {
         const { CEDULA, TELEFONO, CIUDAD, NOMBRE, RUTA } = req.body;
@@ -77,13 +77,13 @@ app.post("/api/enviar-ubicacion", async (req, res) => {
         if (!CEDULA || !TELEFONO || !CIUDAD || !NOMBRE || !RUTA) {
             return res.status(400).json({ 
                 success: false,
-                mensaje: "CEDULA, TELEFONO, CIUDAD, NOMBRE o RUTA no proporcionado"
+                mensaje: "Faltan campos requeridos: CEDULA, TELEFONO, CIUDAD, NOMBRE, RUTA"
             });
         }
 
         const cedulaString = CEDULA.toString().trim();
 
-        // ✅ CORREGIDO: Se envían todos los campos requeridos para Nutresa
+        // ✅ Payload con todos los datos de Nutresa
         const payload = {
             CEDULA: cedulaString,
             TELEFONO: TELEFONO,
