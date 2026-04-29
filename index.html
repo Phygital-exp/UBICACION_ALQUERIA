@@ -276,16 +276,17 @@
             return;
         }
 
-        // Preparar payload con los datos del usuario
+        // Preparar payload - solo enviar campos que existen y tienen valor
         const payload = {
-            CEDULA: usuarioValidado.CEDULA || document.getElementById('cedula-display').textContent,
-            TELEFONO: usuarioValidado.TELEFONO || '',
-            CIUDAD: usuarioValidado.CIUDAD || usuarioValidado.REGION || '',
-            NOMBRE: usuarioValidado.NOMBRE || '',
-            RUTA: usuarioValidado.RUTA || ''
+            CEDULA: usuarioValidado.CEDULA,
+            TELEFONO: usuarioValidado.TELEFONO,
+            CIUDAD: usuarioValidado.CIUDAD,
+            NOMBRE: usuarioValidado.NOMBRE,
+            RUTA: usuarioValidado.RUTA
         };
 
-        console.log("Enviando:", payload);
+        console.log("Datos del usuario validado:", JSON.stringify(usuarioValidado, null, 2));
+        console.log("Payload a enviar:", JSON.stringify(payload, null, 2));
         mensajeUbicacion.innerHTML = '<p class="status info"><span class="loading"></span>Enviando datos...</p>';
 
         try {
@@ -294,20 +295,23 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             })
-            .then(res => {
+            .then(async res => {
+                const data = await res.json();
+                console.log("Respuesta del servidor:", data);
                 if (res.ok) {
                     mensajeUbicacion.innerHTML = '<p class="status success"><i class="material-icons icon">check_circle</i>✅ Datos enviados correctamente!</p>';
                 } else {
-                    throw new Error('Error en la respuesta del servidor');
+                    console.error("Error del servidor:", data);
+                    throw new Error(data.error || 'Error en la respuesta del servidor');
                 }
             })
             .catch(error => {
                 console.error("Error al enviar:", error);
-                mensajeUbicacion.innerHTML = '<p class="status error"><i class="material-icons icon">error</i>❌ Error al enviar los datos. Intenta de nuevo.</p>';
+                mensajeUbicacion.innerHTML = '<p class="status error"><i class="material-icons icon">error</i>❌ Error: ' + error.message + '</p>';
             });
         } catch (error) {
             console.error("Error:", error);
-            mensajeUbicacion.innerHTML = '<p class="status error"><i class="material-icons icon">error</i>❌ Error al enviar los datos. Intenta de nuevo.</p>';
+            mensajeUbicacion.innerHTML = '<p class="status error"><i class="material-icons icon">error</i>❌ Error al enviar los datos.</p>';
         }
     }
 
